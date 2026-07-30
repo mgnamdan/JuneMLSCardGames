@@ -5,18 +5,13 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 from managers import BlackjackManager
 
-from cards import PlayingCard
-from decks import NormalDeck
-
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # MAIN FUNCTION DEFINITION
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def main():
-    testDeck = NormalDeck()
+    BlackjackManager()
 
-    print(testDeck)
 
 
 
