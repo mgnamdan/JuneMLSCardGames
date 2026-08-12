@@ -38,23 +38,6 @@ class CompBlackjackPlayer:
         return self.hand.pop(cardIdx)
 
 
-    def showHand(self):
-        print("")
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("")
-        print(f"                {self.name.upper()}'S HAND")
-        print("")
-        if len(self.hand) == 0:
-            print("                     Hand is empty!")
-        else:
-            print("                     1. ??? of ???")
-            for idx in range(1, len(self.hand)):
-                print(f"                     {idx+1}. {self.hand[idx]}")
-        print("")
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("")
-
-
     def calcScore(self):
         self.score = 0
         aces = 0
@@ -84,44 +67,7 @@ class CompBlackjackPlayer:
 
 
 class HumanBlackjackPlayer(CompBlackjackPlayer):
-
-    def showHand(self):
-        print("")
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("")
-        print(f"                {self.name.upper()}'S HAND")
-        print("")
-        if len(self.hand) == 0:
-            print("                     Hand is empty!")
-        else:
-            for idx in range(len(self.hand)):
-                print(f"                     {idx+1}. {self.hand[idx]}")
-        print("")
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("")
-
-
-    def makeChoice(self):
-        validChoice = False
-        while not validChoice:
-            self.calcScore()
-            if self.score >= 21 or len(self.hand) >= 5:
-                choice = "stay"
-                validChoice = True
-            else:
-                self.showHand()
-                print("Would you like to [hit] or [stay]?")
-                choice = input(" --> ").lower()
-                if choice in ["hit", "h"]:
-                    choice = "hit"
-                    validChoice = True
-                elif choice in ["stay", "s"]:
-                    choice = "stay"
-                    validChoice = True
-                else:
-                    print("")
-                    print("Invalid choice - choose again!")
-        return choice
+    pass
 
 
 
@@ -206,24 +152,6 @@ class GoFishCompPlayer:
 
     def giveScore(self):
         return len(self.pairs)
-
-
-    def showHand(self):
-        print("")
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("")
-        print(f"                {self.name.upper()}'S HAND")
-        print("")
-        if len(self.hand) == 0:
-            print("                     Hand is empty!")
-        else:
-            for idx in range(len(self.hand)):
-                print(f"                     {idx+1}. ??? of ???")
-        print("")
-        print(f"                     Pairs: {len(self.pairs)}")
-        print("")
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("")
 
 
     def rememberRequest(self, askingPlayer, requestedRank):
@@ -318,99 +246,4 @@ class GoFishCompPlayer:
 
 
 class GoFishHumanPlayer(GoFishCompPlayer):
-
-    def showHand(self):
-        print("")
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("")
-        print(f"                {self.name.upper()}'S HAND")
-        print("")
-        if len(self.hand) == 0:
-            print("                     Hand is empty!")
-        else:
-            for idx in range(len(self.hand)):
-                print(f"                     {idx+1}. {self.hand[idx]}")
-        print("")
-        print(f"                     Pairs: {len(self.pairs)}")
-        print("")
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("")
-
-
-    def makeChoice(self, players):
-        self.showHand()
-        opponents = []
-        for player in players:
-            if player != self and len(player.hand) > 0:
-                opponents.append(player)
-
-        if len(self.hand) == 0 or len(opponents) == 0:
-            return None, None
-
-        if len(opponents) == 1:
-            askedPlayer = opponents[0]
-            numCards = len(askedPlayer.hand)
-            numPairs = askedPlayer.giveScore()
-            if numPairs == 1:
-                pairWord = "pair"
-            else:
-                pairWord = "pairs"
-            print(f"You are asking {askedPlayer} ({numCards} cards, {numPairs} {pairWord}).")
-        else:
-            validPlayer = False
-            while not validPlayer:
-                print("Who would you like to ask?")
-                for idx in range(len(opponents)):
-                    numCards = len(opponents[idx].hand)
-                    numPairs = opponents[idx].giveScore()
-                    if numPairs == 1:
-                        pairWord = "pair"
-                    else:
-                        pairWord = "pairs"
-                    print(f"  {idx+1}. {opponents[idx]} ({numCards} cards, {numPairs} {pairWord})")
-                playerChoice = input(" --> ")
-
-                try:
-                    playerIdx = int(playerChoice) - 1
-                    if playerIdx >= 0 and playerIdx < len(opponents):
-                        askedPlayer = opponents[playerIdx]
-                        validPlayer = True
-                    else:
-                        print("")
-                        print("Invalid player - please choose again!")
-                except ValueError:
-                    for player in opponents:
-                        if player.name.lower() == playerChoice.lower():
-                            askedPlayer = player
-                            validPlayer = True
-                    if not validPlayer:
-                        print("")
-                        print("Invalid player - please choose again!")
-
-        ranks = self.giveRanks()
-        validRank = False
-        while not validRank:
-            print("")
-            print("Which rank would you like to request?")
-            for idx in range(len(ranks)):
-                print(f"  {idx+1}. {ranks[idx]}")
-            rankChoice = input(" --> ")
-
-            try:
-                rankIdx = int(rankChoice) - 1
-                if rankIdx >= 0 and rankIdx < len(ranks):
-                    requestedRank = ranks[rankIdx]
-                    validRank = True
-                else:
-                    print("")
-                    print("Invalid rank - please choose again!")
-            except ValueError:
-                for rank in ranks:
-                    if rank.lower() == rankChoice.lower():
-                        requestedRank = rank
-                        validRank = True
-                if not validRank:
-                    print("")
-                    print("Invalid rank - please choose again!")
-
-        return askedPlayer, requestedRank
+    pass

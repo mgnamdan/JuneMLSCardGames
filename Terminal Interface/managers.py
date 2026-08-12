@@ -1,6 +1,7 @@
 # This file will contain the class definitions for the game manager objects
 from players import CompBlackjackPlayer, HumanBlackjackPlayer, GoFishCompPlayer, GoFishHumanPlayer
 from decks import NormalDeck
+from currency import Currency
 from random import choice, randint
 
 
@@ -9,10 +10,16 @@ class BlackjackManager:
     COMPNAMES = ["Alex", "Becky", "Charlie", "Devyn", "Eric", "Francine", "Gus", "Hannah"]
 
 
+    def __init__(self):
+        self.chips = Currency(10, "USD")
+        self.currentBet = Currency(0, "USD")
+
+
     def reset(self):
         self.deck = NormalDeck()
         self.dealer = CompBlackjackPlayer()
         self.players = []
+        self.currentBet = Currency(0, "USD")
 
         for _ in range(randint(3, 5)):
             self.deck.shuffle()
@@ -21,19 +28,20 @@ class BlackjackManager:
         print("Enter your name:")
         humName = input(" --> ")
         humanPlayer = HumanBlackjackPlayer(humName)
+        humanPlayer.chips = self.chips
         self.players.append(humanPlayer)
 
         print("")
-        print("How many computers would you like to play against? (1-4)")
-        numComps = input(" --> ")
+        print("How many total players would you like? (2-4)")
+        numPlayers = input(" --> ")
 
         try:
-            numComps = int(numComps)
-            if numComps < 1:
-                numComps = 1
-            if numComps > 4:
-                numComps = 4
-            numComps -= 1
+            numPlayers = int(numPlayers)
+            if numPlayers < 2:
+                numPlayers = 2
+            if numPlayers > 4:
+                numPlayers = 4
+            numComps = numPlayers - 2
         except ValueError:
             numComps = 0
 
@@ -65,7 +73,40 @@ class BlackjackManager:
                 keepGoing = False
 
 
-    def determineWinner(self):
+    def formatCurrency(self, currency):
+        return f"${currency.amount:.2f} {currency.denomination}"
+
+
+    def placeBet(self, betAmount):
+        betAmount = round(float(betAmount), 2)
+        maxBet = min(2.0, self.chips.amount)
+        if betAmount < 0 or betAmount > maxBet:
+            raise ValueError(f"Bet must be between $0.00 and ${maxBet:.2f}.")
+
+        self.currentBet = Currency(betAmount, self.chips.denomination)
+        self.chips -= betAmount
+
+
+    def promptBet(self):
+        maxBet = min(2.0, self.chips.amount)
+        validBet = False
+        while not validBet:
+            print("")
+            print(f"You have {self.formatCurrency(self.chips)} in chips.")
+            print(f"How much would you like to bet? ($0.00-${maxBet:.2f})")
+            betChoice = input(" --> ").replace("$", "")
+
+            try:
+                self.placeBet(betChoice)
+                validBet = True
+            except ValueError:
+                print("")
+                print(f"Invalid bet - choose an amount from $0.00 to ${maxBet:.2f}!")
+
+        print(f"Bet placed: {self.formatCurrency(self.currentBet)}")
+
+
+    def getWinnerInfo(self):
         scores = {}
         for player in self.players:
             pScore = player.giveScore()
@@ -77,14 +118,20 @@ class BlackjackManager:
                 continue
 
         if len(scores) == 0:
-            print("")
-            print("Nobody wins - everyone busted!")
-            return
+            return None, []
 
         highScore = max(scores.keys())
         winners = scores[highScore]
+        return highScore, winners
 
-        if len(winners) == 1:
+
+    def determineWinner(self):
+        highScore, winners = self.getWinnerInfo()
+
+        if len(winners) == 0:
+            print("")
+            print("Nobody wins - everyone busted!")
+        elif len(winners) == 1:
             print(f"{winners[0]} wins with a score of {highScore}!")
         else:
             if self.dealer in winners:
@@ -97,6 +144,27 @@ class BlackjackManager:
                     else:
                         message += f"{winners[idx]}, "
                 print(message)
+        return winners
+
+
+    def settleBet(self, winners):
+        humanPlayer = self.players[0]
+        betAmount = self.currentBet.amount
+
+        if betAmount == 0:
+            result = "No chips were wagered."
+        elif len(winners) == 1 and humanPlayer in winners:
+            self.chips += betAmount * 2
+            result = f"You won {self.formatCurrency(Currency(betAmount * 2))}!"
+        elif humanPlayer in winners and self.dealer not in winners:
+            self.chips += betAmount
+            result = "The game was tied, so your bet was returned."
+        else:
+            result = f"You lost your {self.formatCurrency(self.currentBet)} bet."
+
+        print("")
+        print(result)
+        print(f"Chip balance: {self.formatCurrency(self.chips)}")
 
 
     def promptNextGame(self):
@@ -121,9 +189,12 @@ class BlackjackManager:
         playing = True
         while playing:
             self.reset()
-            for player in self.players:
+            self.manageTurn(self.players[0])
+            self.promptBet()
+            for player in self.players[1:]:
                 self.manageTurn(player)
-            self.determineWinner()
+            winners = self.determineWinner()
+            self.settleBet(winners)
             playing = self.promptNextGame()
 
 
